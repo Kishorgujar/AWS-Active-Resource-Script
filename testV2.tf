@@ -247,6 +247,18 @@ resource "aws_ec2_transit_gateway_route" "private_route" {
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.public_attachment.id
 }
 
+# Associate the public route table with the public attachment
+resource "aws_ec2_transit_gateway_route_table_association" "public_route_table_association" {
+  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.public_tgw_route.id
+  transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.public_attachment.id
+}
+
+# Associate the private route table with the private attachment
+resource "aws_ec2_transit_gateway_route_table_association" "private_route_table_association" {
+  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.private_tgw_route.id
+  transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.private_attachment.id
+}
+
 # Allocate Elastic IP
 resource "aws_eip" "test_eip" {
 }
@@ -302,10 +314,12 @@ resource "aws_instance" "Test" {
   }
 }
 
+
+
 # Create Key Pair
 #resource "aws_key_pair" "BomBay_Linux" {
  # key_name   = "BomBay_Linux"
-  #public_key = file("/home/accuser/Downloads/")
+  #public_key = file("/home/accuser/Downloads/")    #Adjust Path as per your choice
 #}
 
 # Create IAM Role
