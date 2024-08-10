@@ -134,7 +134,7 @@ resource "aws_route_table_association" "public_tgw_sub_association" {
 
 resource "aws_route" "public_route" {
   route_table_id         = aws_route_table.public_pub_route.id
-  destination_cidr_block = "0.0.0.0/16"
+  destination_cidr_block = "0.0.0.0/0"
   gateway_id             = aws_internet_gateway.public_igw.id
 }
 
@@ -203,7 +203,7 @@ resource "aws_ec2_transit_gateway" "test_tgw" {
 resource "aws_ec2_transit_gateway_vpc_attachment" "public_attachment" {
   transit_gateway_id = aws_ec2_transit_gateway.test_tgw.id
   vpc_id             = aws_vpc.public_vpc.id
-  subnet_ids          = [aws_subnet.public_pub_sub.id]
+  subnet_ids          = [aws_subnet.public_tgw_sub.id]
   transit_gateway_default_route_table_association = false
   tags = {
     Name = "Public_attachment"
@@ -243,7 +243,7 @@ resource "aws_ec2_transit_gateway_route" "public_route" {
 
 resource "aws_ec2_transit_gateway_route" "private_route" {
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.private_tgw_route.id
-  destination_cidr_block         = "192.168.0.0/16"
+  destination_cidr_block         = "0.0.0.0/0"
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.public_attachment.id
 }
 
@@ -274,11 +274,6 @@ resource "aws_nat_gateway" "test_nat" {
 }
 
  # Edit Private VPC route tables
-resource "aws_route" "private_tgw_route" {
-    route_table_id = aws_route_table.private_tgw_route.id
-  destination_cidr_block    = "192.168.0.0/16"
-  transit_gateway_id = aws_ec2_transit_gateway.test_tgw.id
-}
 
 resource "aws_route" "private_ec2_route" {
     route_table_id = aws_route_table.private_ec2_route.id
@@ -287,16 +282,17 @@ resource "aws_route" "private_ec2_route" {
 }
 
 # Edit Public VPC route tables
-resource "aws_route" "public_tgw_route" {
-  route_table_id = aws_route_table.public_tgw_route.id
-  destination_cidr_block    = "10.0.0.0/16"
-  transit_gateway_id = aws_ec2_transit_gateway.test_tgw.id
-}
 
 resource "aws_route" "public_NAT_tgw_route" {
   route_table_id = aws_route_table.public_tgw_route.id
   destination_cidr_block    = "0.0.0.0/0"
   nat_gateway_id = aws_nat_gateway.test_nat.id
+}
+
+resource "aws_route" "Public_Pub_route" {
+  route_table_id = aws_route_table.public_pub_route.id
+  destination_cidr_block = "10.0.0.0/16"
+  transit_gateway_id = aws_ec2_transit_gateway.test_tgw.id
 }
 
 #EC2 Instance
